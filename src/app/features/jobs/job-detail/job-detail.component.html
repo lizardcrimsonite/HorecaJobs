@@ -1,0 +1,28 @@
+<div class="job-detail-container" *ngIf="job">
+  <button class="btn-back" (click)="goBack()">← Volver</button>
+
+  <div class="job-detail">
+    <h1>{{ job.title }}</h1>
+    <h2>{{ job.company }}</h2>
+    <p class="location">📍 {{ job.location }}</p>
+
+    <div class="job-info">
+      <span class="badge">{{ job.type }}</span>
+      <span class="badge">{{ job.category }}</span>
+    </div>
+
+    <div class="salary" *ngIf="job.salary">
+      💰 {{ job.salary.min }} - {{ job.salary.max }} {{ job.salary.currency }}
+    </div>
+
+    <h3>Descripción</h3>
+    <p>{{ job.description }}</p>
+
+    <h3>Requisitos</h3>
+    <ul>
+      <li *ngFor="let req of job.requirements">{{ req }}</li>
+    </ul>
+
+    <button class="btn-apply">Aplicar a este empleo</button>
+  </div>
+</div>

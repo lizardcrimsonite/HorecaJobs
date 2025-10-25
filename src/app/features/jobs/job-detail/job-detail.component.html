@@ -1,28 +1,110 @@
-<div class="job-detail-container" *ngIf="job">
-  <button class="btn-back" (click)="goBack()">← Volver</button>
+<div class="job-detail-page" *ngIf="job">
+  <div class="job-detail-container">
+    <!-- Botón volver -->
+    <button class="btn-back" (click)="goBack()">
+      ← Volver a empleos
+    </button>
 
-  <div class="job-detail">
-    <h1>{{ job.title }}</h1>
-    <h2>{{ job.company }}</h2>
-    <p class="location">📍 {{ job.location }}</p>
+    <!-- Header del empleo -->
+    <div class="job-header">
+      <div class="job-header-content">
+        <h1 class="job-title">{{ job.title }}</h1>
+        <h2 class="company-name">{{ job.company }}</h2>
+        
+        <div class="job-meta">
+          <span class="meta-item">
+            <span class="icon">📍</span>
+            {{ job.location }}
+          </span>
+          <span class="meta-item">
+            <span class="icon">💼</span>
+            {{ getJobTypeLabel(job.type) }}
+          </span>
+          <span class="meta-item">
+            <span class="icon">🏷️</span>
+            {{ getCategoryLabel(job.category) }}
+          </span>
+          <span class="meta-item">
+            <span class="icon">📅</span>
+            Publicado: {{ job.postedDate | date:'dd/MM/yyyy' }}
+          </span>
+        </div>
 
-    <div class="job-info">
-      <span class="badge">{{ job.type }}</span>
-      <span class="badge">{{ job.category }}</span>
+        <div class="salary-badge" *ngIf="job.salary">
+          💰 {{ job.salary.min | number }} - {{ job.salary.max | number }} {{ job.salary.currency }}/mes
+        </div>
+      </div>
     </div>
 
-    <div class="salary" *ngIf="job.salary">
-      💰 {{ job.salary.min }} - {{ job.salary.max }} {{ job.salary.currency }}
+    <!-- Contenido principal -->
+    <div class="job-content">
+      <div class="main-content">
+        <!-- Descripción -->
+        <section class="content-section">
+          <h3>📋 Descripción del puesto</h3>
+          <p class="description">{{ job.description }}</p>
+        </section>
+
+        <!-- Requisitos -->
+        <section class="content-section">
+          <h3>✅ Requisitos</h3>
+          <ul class="requirements-list">
+            <li *ngFor="let req of job.requirements">{{ req }}</li>
+          </ul>
+        </section>
+
+        <!-- Botón de aplicar -->
+        <div class="apply-section">
+          <button 
+            *ngIf="!hasApplied" 
+            class="btn-apply" 
+            (click)="applyToJob()"
+            [disabled]="applying"
+          >
+            <span *ngIf="!applying">🚀 Aplicar a este empleo</span>
+            <span *ngIf="applying">Enviando aplicación...</span>
+          </button>
+
+          <div *ngIf="hasApplied" class="applied-message">
+            <span class="icon">✅</span>
+            <span>Ya has aplicado a este empleo</span>
+          </div>
+
+          <p class="apply-note" *ngIf="!isLoggedIn">
+            <span class="icon">ℹ️</span>
+            Necesitas iniciar sesión para aplicar a este empleo
+          </p>
+        </div>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-card">
+          <h4>📊 Información adicional</h4>
+          <div class="info-item">
+            <span class="label">Tipo de contrato:</span>
+            <span class="value">{{ getJobTypeLabel(job.type) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Categoría:</span>
+            <span class="value">{{ getCategoryLabel(job.category) }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">Estado:</span>
+            <span class="value status-active" *ngIf="job.isActive">🟢 Activo</span>
+            <span class="value status-inactive" *ngIf="!job.isActive">🔴 Cerrado</span>
+          </div>
+        </div>
+
+        <div class="sidebar-card tip-card">
+          <h4>💡 Consejo</h4>
+          <p>Asegúrate de que tu perfil esté completo antes de aplicar. Los empleadores valoran la información detallada.</p>
+        </div>
+      </aside>
     </div>
-
-    <h3>Descripción</h3>
-    <p>{{ job.description }}</p>
-
-    <h3>Requisitos</h3>
-    <ul>
-      <li *ngFor="let req of job.requirements">{{ req }}</li>
-    </ul>
-
-    <button class="btn-apply">Aplicar a este empleo</button>
   </div>
+</div>
+
+<div class="loading" *ngIf="!job">
+  <p>Cargando detalles del empleo...</p>
 </div>

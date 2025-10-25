@@ -2,9 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { JobService } from '../../../core/services/job.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { Job } from '../../../core/models/job.model';
-import { finalize, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 @Component({
   selector: 'app-job-detail',
@@ -15,36 +14,64 @@ import { of } from 'rxjs';
 })
 export class JobDetailComponent implements OnInit {
   job?: Job;
-  isLoading = false;
-  error: string | null = null;
+  isLoggedIn = false;
+  hasApplied = false;
+  applying = false;
 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private jobService: JobService
+    private jobService: JobService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
+    this.isLoggedIn = this.authService.isAuthenticated();
+    
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
-      this.isLoading = true;
-      this.jobService.getJobById(id).pipe(
-        catchError(error => {
-          this.error = 'Error loading job details. Please try again later.';
-          return of(null);
-        }),
-        finalize(() => this.isLoading = false)
-      ).subscribe(job => {
-        if (job) {
-          this.job = job;
-        }
+      this.jobService.getJobById(id).subscribe(job => {
+        this.job = job;
       });
-    } else {
-      this.error = 'No job ID provided';
     }
   }
 
   goBack(): void {
     this.router.navigate(['/jobs']);
+  }
+
+  applyToJob(): void {
+    if (!this.isLoggedIn) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.applying = true;
+    
+    // Simulamos el envío de aplicación
+    setTimeout(() => {
+      this.hasApplied = true;
+      this.applying = false;
+      alert('¡Aplicación enviada con éxito! 🎉');
+    }, 1500);
+  }
+
+  getJobTypeLabel(type: string): string {
+    const labels: { [key: string]: string } = {
+      'full_time': 'Tiempo Completo',
+      'part_time': 'Medio Tiempo',
+      'temporary': 'Temporal'
+    };
+    return labels[type] || type;
+  }
+
+  getCategoryLabel(category: string): string {
+    const labels: { [key: string]: string } = {
+      'kitchen': 'Cocina',
+      'service': 'Servicio',
+      'management': 'Gerencia',
+      'reception': 'Recepción'
+    };
+    return labels[category] || category;
   }
 }

@@ -3,7 +3,9 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { JobService } from '../../../core/services/job.service';
 import { AuthService } from '../../../core/services/auth.service';
+import { ApplicationService } from '../../../core/services/application.service';
 import { Job } from '../../../core/models/job.model';
+import { ApplicationStatus } from '../../../core/models/application.model';
 
 @Component({
   selector: 'app-job-detail',
@@ -22,16 +24,20 @@ export class JobDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private jobService: JobService,
-    private authService: AuthService
+    private authService: AuthService,
+    private applicationService: ApplicationService
   ) {}
 
   ngOnInit(): void {
     this.isLoggedIn = this.authService.isAuthenticated();
-    
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.jobService.getJobById(id).subscribe(job => {
         this.job = job;
+        if (job) {
+          this.hasApplied = this.applicationService.hasAppliedToJob(job.id);
+        }
       });
     }
   }
@@ -46,14 +52,25 @@ export class JobDetailComponent implements OnInit {
       return;
     }
 
+    if (!this.job) return;
+
     this.applying = true;
-    
-    // Simulamos el envío de aplicación
-    setTimeout(() => {
+
+    const currentUser = this.authService.currentUserValue;
+    if (!currentUser) return;
+
+    // Guardar la aplicación
+    this.applicationService.addApplication({
+      jobId: this.job.id,
+      jobTitle: this.job.title,
+      company: this.job.company,
+      candidateId: currentUser.id,
+      status: ApplicationStatus.PENDING
+    }).subscribe(() => {
       this.hasApplied = true;
       this.applying = false;
-      alert('¡Aplicación enviada con éxito! 🎉');
-    }, 1500);
+      alert('¡Aplicación enviada con éxito! 🎉\n\nPuedes ver tu aplicación en "Mis Aplicaciones"');
+    });
   }
 
   getJobTypeLabel(type: string): string {

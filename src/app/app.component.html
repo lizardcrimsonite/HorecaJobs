@@ -3,24 +3,27 @@
     <div class="nav-content">
       <h1 class="logo" routerLink="/jobs">🍴 HorecaJobs</h1>
       <div class="nav-links">
-        <a routerLink="/jobs" routerLinkActive="active">Empleos</a>
-        
+        <a routerLink="/jobs" routerLinkActive="active" [routerLinkActiveOptions]="{exact: false}">Empleos</a>
+
         <!-- Si NO está logueado -->
         <a *ngIf="!currentUser" routerLink="/login" routerLinkActive="active">Iniciar Sesión</a>
-        
+
         <!-- Si está logueado -->
-        <div *ngIf="currentUser" class="user-menu">
-          <span class="user-name">👤 {{ currentUser.name }}</span>
-          <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
-        </div>
+        <ng-container *ngIf="currentUser">
+          <a routerLink="/my-applications" routerLinkActive="active">Mis Aplicaciones</a>
+          <div class="user-menu">
+            <span class="user-name">👤 {{ currentUser.name }}</span>
+            <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>
+          </div>
+        </ng-container>
       </div>
     </div>
   </nav>
-  
+
   <main>
     <router-outlet></router-outlet>
   </main>
-  
+
   <footer class="footer">
     <p>© 2025 HorecaJobs - Plataforma de empleos en hostelería</p>
   </footer>

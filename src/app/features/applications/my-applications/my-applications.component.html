@@ -1,0 +1,72 @@
+<div class="applications-page">
+  <div class="applications-container">
+    <header class="page-header">
+      <h1>📋 Mis Aplicaciones</h1>
+      <p>Gestiona tus postulaciones a empleos</p>
+    </header>
+
+    <!-- Loading -->
+    <div class="loading" *ngIf="loading">
+      <p>Cargando aplicaciones...</p>
+    </div>
+
+    <!-- Lista de aplicaciones -->
+    <div class="applications-list" *ngIf="!loading && applications.length > 0">
+      <div class="application-card" *ngFor="let app of applications">
+        <div class="card-header">
+          <div class="job-info">
+            <h2>{{ app.jobTitle }}</h2>
+            <p class="company">{{ app.company }}</p>
+          </div>
+          <div class="status-badge" [ngClass]="getStatusClass(app.status)">
+            <span class="icon">{{ getStatusIcon(app.status) }}</span>
+            <span>{{ getStatusLabel(app.status) }}</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <div class="dates-info">
+            <div class="date-item">
+              <span class="label">Aplicado:</span>
+              <span class="value">{{ app.appliedDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+            <div class="date-item">
+              <span class="label">Actualizado:</span>
+              <span class="value">{{ app.updatedDate | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="cover-letter" *ngIf="app.coverLetter">
+            <h4>Carta de presentación:</h4>
+            <p>{{ app.coverLetter }}</p>
+          </div>
+        </div>
+
+        <div class="card-actions">
+          <button class="btn-view" (click)="viewJobDetail(app.jobId)">
+            Ver empleo
+          </button>
+          <button 
+            class="btn-cancel" 
+            (click)="cancelApplication(app.id, app.jobTitle)"
+            *ngIf="app.status === 'pending' || app.status === 'reviewed'"
+          >
+            Cancelar aplicación
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sin aplicaciones -->
+    <div class="no-applications" *ngIf="!loading && applications.length === 0">
+      <div class="empty-state">
+        <span class="icon">📭</span>
+        <h2>No tienes aplicaciones aún</h2>
+        <p>Explora las ofertas de empleo y aplica a las que te interesen</p>
+        <button class="btn-browse" routerLink="/jobs">
+          Explorar empleos
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

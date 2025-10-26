@@ -4,15 +4,78 @@
     <p>Encuentra tu próxima oportunidad en hostelería y restauración</p>
   </header>
 
+  <!-- Filtros -->
+  <div class="filters-section">
+    <div class="search-bar">
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="applyFilters()"
+        placeholder="🔍 Buscar por título, empresa o descripción..."
+        class="search-input"
+      />
+    </div>
+
+    <div class="filters-grid">
+      <select 
+        [(ngModel)]="selectedCategory" 
+        (ngModelChange)="applyFilters()"
+        class="filter-select"
+      >
+        <option *ngFor="let cat of categories" [value]="cat.value">
+          {{ cat.label }}
+        </option>
+      </select>
+
+      <select 
+        [(ngModel)]="selectedType" 
+        (ngModelChange)="applyFilters()"
+        class="filter-select"
+      >
+        <option *ngFor="let type of types" [value]="type.value">
+          {{ type.label }}
+        </option>
+      </select>
+
+      <select 
+        [(ngModel)]="selectedLocation" 
+        (ngModelChange)="applyFilters()"
+        class="filter-select"
+      >
+        <option value="">Todas las ubicaciones</option>
+        <option *ngFor="let loc of locations" [value]="loc">
+          {{ loc || 'Todas' }}
+        </option>
+      </select>
+
+      <button 
+        *ngIf="hasActiveFilters()" 
+        (click)="clearFilters()" 
+        class="btn-clear-filters"
+      >
+        ✕ Limpiar filtros
+      </button>
+    </div>
+
+    <div class="results-count">
+      <p>
+        <strong>{{ filteredJobs.length }}</strong> 
+        {{ filteredJobs.length === 1 ? 'empleo encontrado' : 'empleos encontrados' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Loading -->
   <div class="loading" *ngIf="loading">
     <p>Cargando empleos...</p>
   </div>
 
-  <div class="jobs-grid" *ngIf="!loading">
-    <div class="job-card" *ngFor="let job of jobs" (click)="viewJob(job.id)">
+  <!-- Lista de empleos -->
+  <div class="jobs-grid" *ngIf="!loading && filteredJobs.length > 0">
+    <div class="job-card" *ngFor="let job of filteredJobs" (click)="viewJob(job.id)">
       <div class="job-header">
         <h2>{{ job.title }}</h2>
-        <span class="job-type">{{ job.type }}</span>
+        <span class="job-type">{{ getTypeLabel(job.type) }}</span>
       </div>
       
       <div class="job-company">
@@ -24,7 +87,7 @@
       </div>
       
       <div class="job-category">
-        🏷️ {{ job.category }}
+        🏷️ {{ getCategoryLabel(job.category) }}
       </div>
       
       <div class="job-description">
@@ -32,10 +95,20 @@
       </div>
       
       <div class="job-salary" *ngIf="job.salary">
-        💰 {{ job.salary.min }} - {{ job.salary.max }} {{ job.salary.currency }}
+        💰 {{ job.salary.min | number }} - {{ job.salary.max | number }} {{ job.salary.currency }}
       </div>
       
       <button class="btn-view">Ver detalles</button>
+    </div>
+  </div>
+
+  <!-- Sin resultados -->
+  <div class="no-results" *ngIf="!loading && filteredJobs.length === 0">
+    <div class="no-results-content">
+      <span class="icon">😕</span>
+      <h3>No se encontraron empleos</h3>
+      <p>Intenta ajustar tus filtros de búsqueda</p>
+      <button (click)="clearFilters()" class="btn-clear">Limpiar filtros</button>
     </div>
   </div>
 </div>

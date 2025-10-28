@@ -11,6 +11,7 @@
         <!-- Si está logueado -->
         <ng-container *ngIf="currentUser">
           <a routerLink="/my-applications" routerLinkActive="active">Mis Aplicaciones</a>
+          <a routerLink="/profile" routerLinkActive="active">Mi Perfil</a>
           <div class="user-menu">
             <span class="user-name">👤 {{ currentUser.name }}</span>
             <button class="btn-logout" (click)="logout()">Cerrar Sesión</button>

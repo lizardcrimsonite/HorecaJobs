@@ -1,0 +1,205 @@
+<div class="profile-page" *ngIf="profile">
+  <div class="profile-container">
+
+    <!-- Header del perfil -->
+    <div class="profile-header">
+      <div class="avatar">
+        <span class="avatar-icon">👤</span>
+      </div>
+      <div class="header-info">
+        <h1>{{ profile.name }}</h1>
+        <p class="role-badge" *ngIf="isCandidate()">🎯 Candidato</p>
+        <p class="role-badge employer" *ngIf="!isCandidate()">🏢 Empleador</p>
+      </div>
+      <button class="btn-edit" (click)="toggleEditMode()">
+        {{ editMode ? '❌ Cancelar' : '✏️ Editar Perfil' }}
+      </button>
+    </div>
+
+    <!-- Formulario de edición -->
+    <div class="edit-section" *ngIf="editMode">
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+        <h3>📝 Editar Información</h3>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nombre completo *</label>
+            <input type="text" formControlName="name" placeholder="Tu nombre">
+          </div>
+
+          <div class="form-group">
+            <label>Email *</label>
+            <input type="email" formControlName="email" placeholder="tu@email.com">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input type="tel" formControlName="phone" placeholder="+34 600 000 000">
+          </div>
+
+          <div class="form-group" *ngIf="isCandidate()">
+            <label>Ubicación</label>
+            <input type="text" formControlName="location" placeholder="Madrid, España">
+          </div>
+        </div>
+
+        <div class="form-group" *ngIf="isCandidate()">
+          <label>Biografía</label>
+          <textarea formControlName="bio" rows="4" placeholder="Cuéntanos sobre ti..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-save" [disabled]="!profileForm.valid">
+          💾 Guardar Cambios
+        </button>
+      </form>
+    </div>
+
+    <!-- Información general -->
+    <div class="info-section" *ngIf="!editMode">
+      <div class="info-card">
+        <h3>📋 Información de Contacto</h3>
+        <div class="info-item">
+          <span class="label">📧 Email:</span>
+          <span class="value">{{ profile.email }}</span>
+        </div>
+        <div class="info-item" *ngIf="profile.phone">
+          <span class="label">📞 Teléfono:</span>
+          <span class="value">{{ profile.phone }}</span>
+        </div>
+        <div class="info-item" *ngIf="isCandidate() && getCandidate()?.location">
+          <span class="label">📍 Ubicación:</span>
+          <span class="value">{{ getCandidate()?.location }}</span>
+        </div>
+      </div>
+
+      <div class="info-card" *ngIf="isCandidate() && getCandidate()?.bio">
+        <h3>💬 Sobre mí</h3>
+        <p class="bio">{{ getCandidate()?.bio }}</p>
+      </div>
+    </div>
+
+    <!-- Habilidades (solo candidatos) -->
+    <div class="skills-section" *ngIf="isCandidate() && !editMode">
+      <div class="section-header">
+        <h3>🎯 Habilidades</h3>
+        <button class="btn-add-small" (click)="toggleAddSkill()">
+          {{ addingSkill ? '❌' : '+ Agregar' }}
+        </button>
+      </div>
+
+      <form *ngIf="addingSkill" [formGroup]="skillForm" (ngSubmit)="addSkill()" class="add-form">
+        <input type="text" formControlName="skill" placeholder="Nueva habilidad">
+        <button type="submit" [disabled]="!skillForm.valid">Agregar</button>
+      </form>
+
+      <div class="skills-list">
+        <span class="skill-tag" *ngFor="let skill of getCandidate()?.skills">
+          {{ skill }}
+          <button class="remove-btn" (click)="removeSkill(skill)">×</button>
+        </span>
+        <p *ngIf="getCandidate()?.skills && getCandidate()!.skills.length === 0" class="empty-message">
+      </div>
+    </div>
+
+    <!-- Experiencia (solo candidatos) -->
+    <div class="experience-section" *ngIf="isCandidate() && !editMode">
+      <div class="section-header">
+        <h3>💼 Experiencia Laboral</h3>
+        <button class="btn-add-small" (click)="toggleAddExperience()">
+          {{ addingExperience ? '❌' : '+ Agregar' }}
+        </button>
+      </div>
+
+      <form *ngIf="addingExperience" [formGroup]="experienceForm" (ngSubmit)="addExperience()" class="experience-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label>Puesto *</label>
+            <input type="text" formControlName="position" placeholder="Ej: Camarero">
+          </div>
+          <div class="form-group">
+            <label>Empresa *</label>
+            <input type="text" formControlName="company" placeholder="Ej: Restaurante XYZ">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Fecha inicio *</label>
+            <input type="date" formControlName="startDate">
+          </div>
+          <div class="form-group">
+            <label>Fecha fin</label>
+            <input type="date" formControlName="endDate" [disabled]="experienceForm.get('current')?.value">
+          </div>
+        </div>
+
+        <div class="form-group checkbox-group">
+          <label>
+            <input type="checkbox" formControlName="current">
+            Trabajo actual
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label>Descripción</label>
+          <textarea formControlName="description" rows="3" placeholder="Describe tus responsabilidades..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-save" [disabled]="!experienceForm.valid">
+          Agregar Experiencia
+        </button>
+      </form>
+
+      <div class="experience-list">
+        <div class="experience-item" *ngFor="let exp of getCandidate()?.experience">
+          <div class="exp-header">
+            <div>
+              <h4>{{ exp.position }}</h4>
+              <p class="company">{{ exp.company }}</p>
+            </div>
+            <button class="btn-remove" (click)="removeExperience(exp.id)">🗑️</button>
+          </div>
+          <p class="dates">
+            {{ exp.startDate | date:'MM/yyyy' }} -
+            {{ exp.current ? 'Presente' : (exp.endDate | date:'MM/yyyy') }}
+          </p>
+          <p class="description" *ngIf="exp.description">{{ exp.description }}</p>
+        </div>
+        <p *ngIf="getCandidate()?.experience && getCandidate()!.experience.length === 0" class="empty-message">
+      </div>
+    </div>
+
+    <!-- Resumen de aplicaciones -->
+    <div class="applications-summary">
+      <h3>📊 Resumen de Aplicaciones</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <span class="stat-number">{{ applications.length }}</span>
+          <span class="stat-label">Total Aplicaciones</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">{{ getPendingCount() }}</span>
+          <span class="stat-label">Pendientes</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">{{ getInterviewCount() }}</span>
+          <span class="stat-label">Entrevistas</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-number">{{ getAcceptedCount() }}</span>
+          <span class="stat-label">Aceptadas</span>
+        </div>
+      </div>
+      <button class="btn-view-all" routerLink="/my-applications">
+        Ver todas mis aplicaciones →
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<div class="loading" *ngIf="!profile">
+  <p>Cargando perfil...</p>
+</div>
